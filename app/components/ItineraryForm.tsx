@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import DestinationInput from "./DestinationInput"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypeRaw from "rehype-raw"
@@ -52,14 +53,11 @@ export default function ItineraryForm() {
                 <div className="row g-2 align-items-end">
                   <div className="col-12 col-md-6">
                     <label htmlFor="place" className="form-label">Destination</label>
-                    <input
-                      type="text"
-                      id="place"
+                    <DestinationInput
                       value={place}
-                      onChange={(e) => setPlace(e.target.value)}
+                      onChange={(v) => setPlace(v)}
+                      onSelect={(s) => setPlace(s.display_name)}
                       placeholder="Enter destination (e.g., Paris, France)"
-                      required
-                      className="form-control"
                     />
                   </div>
 
