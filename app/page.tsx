@@ -30,51 +30,42 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left w-full">
-          <div className="flex items-center gap-4 w-full">
-            {session.user.image && (
-              <Image
-                src={session.user.image}
-                alt={session.user.name || "User"}
-                width={48}
-                height={48}
-                className="rounded-full"
-              />
-            )}
-            <div>
-              <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
-                Welcome, {session.user.name}!
-              </h1>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                {session.user.email}
-              </p>
+    <div className="d-flex min-vh-100 align-items-center justify-content-center bg-zinc-50 font-sans dark:bg-black">
+      <main className="container-fluid py-5 px-3 bg-white dark:bg-black">
+        <div className="mb-4">
+          <Image
+            className="dark:invert"
+            src="/next.svg"
+            alt="Next.js logo"
+            width={100}
+            height={20}
+            priority
+          />
+        </div>
+
+        <div className="row w-100">
+          <div className="col-12">
+            <div className="d-flex align-items-center gap-3 mb-3">
+              {session.user.image && (
+                <Image
+                  src={session.user.image}
+                  alt={session.user.name || "User"}
+                  width={48}
+                  height={48}
+                  className="rounded-full"
+                />
+              )}
+              <div>
+                <h1 className="h4 text-black dark:text-zinc-50 mb-0">Welcome, {session.user.name}!</h1>
+                <p className="text-muted mb-0">{session.user.email}</p>
+              </div>
             </div>
-          </div>
-          
-          <ItineraryForm />
-          
-          <div className="w-full p-6 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4 text-black dark:text-zinc-50">
-              Your Itineraries
-            </h2>
-            <p className="text-zinc-600 dark:text-zinc-400">
-              Your saved itineraries will appear here.
-            </p>
+
+            <ItineraryForm />
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+        <div className="mt-4 d-flex">
           <SignOutButton />
         </div>
       </main>
