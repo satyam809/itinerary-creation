@@ -1,9 +1,9 @@
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/auth"
+import { authOptions } from "@/services/auth"
 import Image from "next/image"
 import Link from "next/link"
-import SignOutButton from "./components/SignOutButton"
-import ItineraryForm from "./components/ItineraryForm"
+import SignOutButton from "@/features/auth/components/SignOutButton"
+import ItineraryForm from "@/features/itinerary/components/ItineraryForm"
 
 export default async function Home() {
   const session = await getServerSession(authOptions)
