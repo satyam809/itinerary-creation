@@ -66,16 +66,31 @@ export async function saveItinerary(input: SaveItineraryInput) {
   })
 }
 
-export async function listItinerariesByEmail(email: string) {
+async function findUserIdByEmail(email: string) {
   const user = await prisma.user.findUnique({
     where: { email: email.trim() },
     select: { id: true },
   })
+  return user?.id ?? null
+}
 
-  if (!user) return []
+export async function listItinerariesByEmail(email: string) {
+  const userId = await findUserIdByEmail(email)
+  if (!userId) return []
 
   return prisma.itinerary.findMany({
-    where: { userId: user.id },
+    where: { userId },
     orderBy: { createdAt: "desc" },
+  })
+}
+
+export async function getItineraryByIdForEmail(email: string, id: number) {
+  if (!Number.isInteger(id) || id < 1) return null
+
+  const userId = await findUserIdByEmail(email)
+  if (!userId) return null
+
+  return prisma.itinerary.findFirst({
+    where: { id, userId },
   })
 }

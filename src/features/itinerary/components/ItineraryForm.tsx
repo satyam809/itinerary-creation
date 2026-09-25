@@ -4,17 +4,26 @@ import { useState } from "react"
 import DestinationInput from "./DestinationInput"
 import ItineraryResult from "./ItineraryResult"
 
-export default function ItineraryForm() {
-  const [place, setPlace] = useState("")
-  const [days, setDays] = useState("")
-  const [tripType, setTripType] = useState("")
+export type ViewItinerary = {
+  destination: string
+  days: number
+  tripType: string
+  content: string
+}
+
+export default function ItineraryForm({ view = null }: { view?: ViewItinerary | null }) {
+  const isView = Boolean(view)
+  const [place, setPlace] = useState(view?.destination ?? "")
+  const [days, setDays] = useState(view ? String(view.days) : "")
+  const [tripType, setTripType] = useState(view?.tripType ?? "")
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<string | null>(null)
+  const [result, setResult] = useState<string | null>(view?.content ?? null)
   const [error, setError] = useState<string | null>(null)
   const [savedMessage, setSavedMessage] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isView) return
     setError(null)
     setResult(null)
     setSavedMessage(null)
@@ -50,7 +59,7 @@ export default function ItineraryForm() {
         <div className="col-12">
           <div className="card h-100 border-0 mb-3">
             <div className="card-body d-flex flex-column p-3">
-              <h2 className="card-title text-center">Plan Your Trip</h2>
+              <h2 className="card-title text-center">{isView ? "Saved Trip" : "Plan Your Trip"}</h2>
 
               <form onSubmit={handleSubmit} className="mt-3">
                 <div className="row g-2 align-items-end">
@@ -61,6 +70,7 @@ export default function ItineraryForm() {
                       onChange={(v) => setPlace(v)}
                       onSelect={(s) => setPlace(s.display_name)}
                       placeholder="Enter destination (e.g., Paris, France)"
+                      disabled={isView}
                     />
                   </div>
 
@@ -75,6 +85,7 @@ export default function ItineraryForm() {
                       min={1}
                       max={30}
                       required
+                      disabled={isView}
                       className="form-control"
                     />
                   </div>
@@ -86,6 +97,7 @@ export default function ItineraryForm() {
                       value={tripType}
                       onChange={(e) => setTripType(e.target.value)}
                       required
+                      disabled={isView}
                       className="form-select"
                     >
                       <option value="">Select trip type</option>
@@ -103,7 +115,7 @@ export default function ItineraryForm() {
                     <button
                       type="submit"
                       className="btn btn-primary h-100"
-                      disabled={loading}
+                      disabled={loading || isView}
                     >
                       {loading ? "…" : "Go"}
                     </button>

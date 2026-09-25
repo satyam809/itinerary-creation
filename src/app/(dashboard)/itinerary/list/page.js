@@ -1,6 +1,6 @@
+import Link from "next/link"
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
-import ItineraryResult from "@/features/itinerary/components/ItineraryResult"
 import { listItinerariesByEmail } from "@/features/itinerary/services/saveItinerary"
 import { authOptions } from "@/services/auth"
 import { formatDate } from "@/utils/formatters"
@@ -10,6 +10,26 @@ export const dynamic = "force-dynamic"
 function tripTypeLabel(tripType) {
   if (!tripType) return ""
   return tripType.charAt(0).toUpperCase() + tripType.slice(1)
+}
+
+function ViewIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
 }
 
 export default async function ListItineraryPage() {
@@ -28,26 +48,42 @@ export default async function ListItineraryPage() {
       {itineraries.length === 0 ? (
         <p className="text-muted mb-0">No itineraries yet.</p>
       ) : (
-        <div className="d-flex flex-column gap-3">
-          {itineraries.map((itinerary) => (
-            <article key={itinerary.id} className="card">
-              <div className="card-body">
-                <div className="d-flex flex-wrap justify-content-between gap-2 mb-3">
-                  <h2 className="h5 mb-0">{itinerary.destination}</h2>
-                  <span className="text-muted small">
-                    {formatDate(itinerary.createdAt)}
-                  </span>
-                </div>
-                <p className="text-muted mb-3">
-                  {itinerary.days} {itinerary.days === 1 ? "day" : "days"} · {tripTypeLabel(itinerary.tripType)}
-                </p>
-                <ItineraryResult
-                  result={itinerary.content}
-                  destination={itinerary.destination}
-                />
-              </div>
-            </article>
-          ))}
+        <div className="table-responsive">
+          <table className="table table-striped table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Destination</th>
+                <th scope="col">Days</th>
+                <th scope="col">Trip Type</th>
+                <th scope="col">Created</th>
+                <th scope="col" className="text-end">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {itineraries.map((itinerary) => (
+                <tr key={itinerary.id}>
+                  <td>{itinerary.destination}</td>
+                  <td>
+                    {itinerary.days} {itinerary.days === 1 ? "day" : "days"}
+                  </td>
+                  <td>{tripTypeLabel(itinerary.tripType)}</td>
+                  <td>{formatDate(itinerary.createdAt)}</td>
+                  <td className="text-end">
+                    <Link
+                      href={`/itinerary/create?id=${itinerary.id}`}
+                      className="btn btn-outline-primary btn-sm d-inline-flex align-items-center justify-content-center"
+                      aria-label={`View ${itinerary.destination}`}
+                      title="View"
+                    >
+                      <ViewIcon />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </main>

@@ -14,11 +14,13 @@ export default function DestinationInput({
   onChange,
   onSelect,
   placeholder = "Enter destination (e.g., Paris, France)",
+  disabled = false,
 }: {
   value: string
   onChange: (v: string) => void
   onSelect?: (s: Suggestion) => void
   placeholder?: string
+  disabled?: boolean
 }) {
   const [query, setQuery] = useState(value || "")
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
@@ -32,7 +34,7 @@ export default function DestinationInput({
   }, [value])
 
   useEffect(() => {
-    if (!query) {
+    if (disabled || !query) {
       setSuggestions([])
       return
     }
@@ -62,7 +64,7 @@ export default function DestinationInput({
     return () => {
       if (timer.current) window.clearTimeout(timer.current)
     }
-  }, [query])
+  }, [query, disabled])
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -114,6 +116,8 @@ export default function DestinationInput({
         placeholder={placeholder}
         aria-autocomplete="list"
         aria-expanded={suggestions.length > 0}
+        disabled={disabled}
+        readOnly={disabled}
       />
 
       {suggestions.length > 0 && (
