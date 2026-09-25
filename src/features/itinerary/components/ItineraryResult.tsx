@@ -38,19 +38,14 @@ function parseIntoDayBlocks(text: string): Block[] {
 }
 
 export default function ItineraryResult({ result, destination }: { result: string | null; destination?: string | null }) {
-  if (!result) {
-    return <p className="text-muted">Your generated itinerary will appear here after you create it.</p>
-  }
-
-  const blocks = parseIntoDayBlocks(result)
-
   const accessKey = typeof process !== "undefined" ? (process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY as string | undefined) : undefined
   const useUnsplash = Boolean(accessKey)
+  const blocks = result ? parseIntoDayBlocks(result) : []
 
   const [images, setImages] = useState<Record<number, string | null>>({})
 
   useEffect(() => {
-    if (!useUnsplash) return
+    if (!result || !useUnsplash) return
     // fetch one image per block
     blocks.forEach(async (b, i) => {
       try {
@@ -69,7 +64,11 @@ export default function ItineraryResult({ result, destination }: { result: strin
         setImages((prev) => ({ ...prev, [i]: null }))
       }
     })
-  }, [result, destination])
+  }, [result, destination, useUnsplash, accessKey])
+
+  if (!result) {
+    return <p className="text-muted">Your generated itinerary will appear here after you create it.</p>
+  }
 
   if (blocks.length > 1) {
     return (
