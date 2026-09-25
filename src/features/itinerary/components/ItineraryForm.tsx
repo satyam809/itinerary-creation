@@ -11,11 +11,13 @@ export default function ItineraryForm() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [savedMessage, setSavedMessage] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setResult(null)
+    setSavedMessage(null)
     setLoading(true)
 
     try {
@@ -31,6 +33,9 @@ export default function ItineraryForm() {
         setError(data?.error || "Failed to generate itinerary")
       } else {
         setResult(data.text ?? JSON.stringify(data.raw ?? data))
+        if (data.itinerary?.id) {
+          setSavedMessage("Itinerary saved.")
+        }
       }
     } catch (err: any) {
       setError(err?.message ?? String(err))
@@ -108,6 +113,10 @@ export default function ItineraryForm() {
 
               {error && (
                 <div className="alert alert-danger mt-3">Error: {error}</div>
+              )}
+
+              {savedMessage && (
+                <div className="alert alert-success mt-3 mb-0">{savedMessage}</div>
               )}
 
               <div className="mt-auto" />

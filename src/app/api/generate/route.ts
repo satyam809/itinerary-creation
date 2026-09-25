@@ -1,4 +1,10 @@
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import {
+  ItineraryValidationError,
+  saveItinerary,
+} from "@/features/itinerary/services/saveItinerary";
+import { authOptions } from "@/services/auth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +17,48 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Sign in to create an itinerary" },
+        { status: 401 }
+      );
+    }
+
+    const persistGeneratedItinerary = async (text: string, raw: unknown) => {
+      try {
+        const itinerary = await saveItinerary({
+          email: session.user.email as string,
+          name: session.user.name,
+          image: session.user.image,
+          destination,
+          days: Number(days),
+          tripType,
+          content: text,
+        });
+
+        return NextResponse.json({
+          text,
+          raw,
+          itinerary: {
+            id: itinerary.id,
+            destination: itinerary.destination,
+            days: itinerary.days,
+            tripType: itinerary.tripType,
+          },
+        });
+      } catch (error) {
+        if (error instanceof ItineraryValidationError) {
+          return NextResponse.json({ error: error.message }, { status: 400 });
+        }
+        console.error("Failed to save itinerary:", error);
+        return NextResponse.json(
+          { error: "Itinerary was generated but could not be saved" },
+          { status: 500 }
+        );
+      }
+    };
 
     const prompt = `Generate a highly engaging and well-structured ${days}-day ${tripType} trip itinerary for ${destination}.
 For each day, include:
@@ -92,7 +140,7 @@ Format the output clearly by day, keep it concise, and ensure the itinerary feel
 
     // If there's no JSON but we have a text body, return that as the generated text
     if (!extracted && textBody) {
-      return NextResponse.json({ text: textBody, raw: textBody });
+      return persistGeneratedItinerary(textBody, textBody);
     }
 
     // Final fallback: if nothing useful, return diagnostics to help debugging
@@ -104,7 +152,7 @@ Format the output clearly by day, keep it concise, and ensure the itinerary feel
       );
     }
 
-    return NextResponse.json({ text: extracted, raw: data });
+    return persistGeneratedItinerary(extracted, data);
   } catch (err: any) {
     console.error("/api/generate error:", err);
     return NextResponse.json(
