@@ -117,18 +117,24 @@ export default function DestinationInput({
       />
 
       {suggestions.length > 0 && (
-        <ul className="list-group position-absolute w-100" style={{ zIndex: 2000 }}>
+        <ul
+          className="list-group position-absolute w-100 shadow-sm rounded"
+          style={{ zIndex: 2000, maxHeight: 240, overflowY: "auto", top: "calc(100% + 0.25rem)" }}
+          role="listbox"
+        >
           {suggestions.map((s, i) => (
             <li
               key={s.place_id ?? `${s.lat}-${s.lon}-${i}`}
               className={`list-group-item list-group-item-action ${i === active ? "active" : ""}`}
               role="option"
+              aria-selected={i === active}
               onMouseEnter={() => setActive(i)}
               onMouseDown={(e) => {
                 // use onMouseDown to avoid blur before click
                 e.preventDefault()
                 handleSelect(s)
               }}
+              style={{ cursor: "pointer" }}
             >
               {s.display_name}
             </li>
@@ -136,7 +142,11 @@ export default function DestinationInput({
         </ul>
       )}
 
-      {loading && <div className="position-absolute" style={{ right: 8, top: 8 }}>…</div>}
+      {loading && (
+        <div className="position-absolute" style={{ right: 8, top: 8 }}>
+          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        </div>
+      )}
     </div>
   )
 }

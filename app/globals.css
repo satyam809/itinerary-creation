@@ -24,3 +24,38 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Markdown / Generated itinerary responsive helpers */
+.markdown-container {
+  max-height: 50vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .markdown-container {
+    max-height: 70vh;
+  }
+}
+
+.markdown-container img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0.5rem auto;
+}
+
+.markdown-container pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.markdown-container table {
+  width: 100%;
+  display: block;
+  overflow: auto;
+}
+
+.markdown-container iframe {
+  max-width: 100%;
+}

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import DestinationInput from "./DestinationInput"
+import ItineraryResult from "./ItineraryResult"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypeRaw from "rehype-raw"
@@ -45,8 +46,8 @@ export default function ItineraryForm() {
     <div className="container-fluid py-4 px-3">
       <div className="row g-3">
         <div className="col-12">
-          <div className="card h-100 border-0">
-            <div className="card-body d-flex flex-column">
+          <div className="card h-100 border-0 mb-3">
+            <div className="card-body d-flex flex-column p-3">
               <h2 className="card-title text-center">Plan Your Trip</h2>
 
               <form onSubmit={handleSubmit} className="mt-3">
@@ -118,17 +119,11 @@ export default function ItineraryForm() {
         </div>
 
         <div className="col-12">
-          <div className="card h-100">
-            <div className="card-body">
-              <h2 className="card-title">Generated Itinerary</h2>
+          <div className="card h-100 mb-3">
+            <div className="card-body p-3">
+              <h2 className="card-title text-center">Generated Itinerary</h2>
               <div className="mt-3">
-                {result ? (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
-                    {result}
-                  </ReactMarkdown>
-                ) : (
-                  <p className="text-muted">Your generated itinerary will appear here after you create it.</p>
-                )}
+                <ItineraryResult result={result} destination={place} />
               </div>
             </div>
           </div>
@@ -137,3 +132,5 @@ export default function ItineraryForm() {
     </div>
   )
 }
+
+// moved parsing/rendering to `ItineraryResult` component

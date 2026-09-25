@@ -12,7 +12,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const prompt = `Create a ${days}-day ${tripType} trip itinerary for ${destination}. Provide day-by-day activities, top sights, suggested times, places to eat/sleep suggestions, and travel tips. Keep it concise and formatted by day.`;
+    const prompt = `Generate a highly engaging and well-structured ${days}-day ${tripType} trip itinerary for ${destination}.
+For each day, include:
+
+1. Morning, afternoon, evening, and night activities
+2. The top must-visit sights
+3. Recommended local foods or dishes to try
+4. Practical travel tips specific to the location
+
+Format the output clearly by day, keep it concise, and ensure the itinerary feels exciting, helpful, and easy to follow.
+`;
 
     const ollamaUrl = "https://ollama.com/api/generate";
     const ollamaModel = "gpt-oss:120b";
