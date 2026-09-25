@@ -3,9 +3,6 @@
 import { useState } from "react"
 import DestinationInput from "./DestinationInput"
 import ItineraryResult from "./ItineraryResult"
-import ReactMarkdown from "react-markdown"
-import remarkGfm from "remark-gfm"
-import rehypeRaw from "rehype-raw"
 
 export default function ItineraryForm() {
   const [place, setPlace] = useState("")

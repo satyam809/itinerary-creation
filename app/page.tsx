@@ -32,17 +32,6 @@ export default async function Home() {
   return (
     <div className="d-flex min-vh-100 align-items-center justify-content-center bg-zinc-50 font-sans dark:bg-black">
       <main className="container-fluid py-5 px-3 bg-white dark:bg-black">
-        <div className="mb-4">
-          <Image
-            className="dark:invert"
-            src="/next.svg"
-            alt="Next.js logo"
-            width={100}
-            height={20}
-            priority
-          />
-        </div>
-
         <div className="row w-100">
           <div className="col-12">
             <div className="d-flex align-items-center gap-3 mb-3">
