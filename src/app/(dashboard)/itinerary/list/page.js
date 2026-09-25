@@ -42,13 +42,38 @@ export default async function ListItineraryPage() {
   const itineraries = await listItinerariesByEmail(session.user.email)
 
   return (
-    <main className="p-4">
+    <main className="p-3 p-md-4">
       <h1 className="h3 mb-4">Itinerary List</h1>
 
       {itineraries.length === 0 ? (
         <p className="text-muted mb-0">No itineraries yet.</p>
       ) : (
-        <div className="table-responsive">
+        <>
+        <div className="d-md-none">
+          {itineraries.map((itinerary) => (
+            <article key={itinerary.id} className="card mb-3">
+              <div className="card-body">
+                <div className="d-flex justify-content-between align-items-start gap-2">
+                  <h2 className="h6 mb-1 text-break">{itinerary.destination}</h2>
+                  <Link
+                    href={`/itinerary/create?id=${itinerary.id}`}
+                    className="btn btn-outline-primary btn-sm d-inline-flex align-items-center justify-content-center flex-shrink-0"
+                    aria-label={`View ${itinerary.destination}`}
+                    title="View"
+                  >
+                    <ViewIcon />
+                  </Link>
+                </div>
+                <p className="text-muted small mb-0">
+                  {itinerary.days} {itinerary.days === 1 ? "day" : "days"}
+                  {itinerary.tripType ? ` · ${tripTypeLabel(itinerary.tripType)}` : ""}
+                  {` · ${formatDate(itinerary.createdAt)}`}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+        <div className="table-responsive d-none d-md-block">
           <table className="table table-striped table-hover align-middle mb-0">
             <thead>
               <tr>
@@ -85,6 +110,7 @@ export default async function ListItineraryPage() {
             </tbody>
           </table>
         </div>
+        </>
       )}
     </main>
   )

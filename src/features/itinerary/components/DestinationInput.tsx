@@ -129,7 +129,7 @@ export default function DestinationInput({
           {suggestions.map((s, i) => (
             <li
               key={s.place_id ?? `${s.lat}-${s.lon}-${i}`}
-              className={`list-group-item list-group-item-action ${i === active ? "active" : ""}`}
+              className={`list-group-item list-group-item-action text-break ${i === active ? "active" : ""}`}
               role="option"
               aria-selected={i === active}
               onMouseEnter={() => setActive(i)}

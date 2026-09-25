@@ -20,12 +20,12 @@ export default async function SettingsPage() {
   ]
 
   return (
-    <main className="p-4">
+    <main className="p-3 p-md-4">
       <h1 className="h3 mb-4">Settings</h1>
 
       <section className="mb-4">
         <h2 className="h5 mb-3">Account Details</h2>
-        <div className="d-flex align-items-center gap-3 mb-4">
+        <div className="d-flex flex-wrap align-items-center gap-3 mb-4">
           {image ? (
             <Image
               src={image}

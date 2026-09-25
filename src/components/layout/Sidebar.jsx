@@ -81,7 +81,7 @@ const navItems = [
   { label: "Settings", href: "/settings", icon: "settings" },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ open = false, onClose }) {
   const pathname = usePathname();
   const isItineraryActive = pathname?.startsWith("/itinerary");
   const [itineraryOpen, setItineraryOpen] = useState(isItineraryActive);
@@ -93,13 +93,27 @@ export default function Sidebar() {
   const isExactActive = (href) => pathname === href;
 
   return (
-    <aside className="sidebar d-flex flex-column flex-shrink-0 p-3 text-bg-dark">
-      <Link
-        href="/dashboard"
-        className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none"
-      >
-        <span className="fs-5 fw-semibold">Itinerary System</span>
-      </Link>
+    <aside
+      id="app-sidebar"
+      className={`sidebar d-flex flex-column flex-shrink-0 p-3 text-bg-dark${open ? " open" : ""}`}
+    >
+      <div className="d-flex align-items-center justify-content-between gap-2 mb-3 mb-md-0">
+        <Link
+          href="/dashboard"
+          className="d-flex align-items-center text-white text-decoration-none"
+          onClick={onClose}
+        >
+          <span className="fs-5 fw-semibold">Itinerary System</span>
+        </Link>
+        <button
+          type="button"
+          className="btn btn-sm btn-outline-light d-md-none"
+          aria-label="Close menu"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+      </div>
       <hr />
       <ul className="nav nav-pills flex-column mb-auto gap-1">
         {navItems.map((item) => {
@@ -140,6 +154,7 @@ export default function Sidebar() {
                           className={`nav-link py-1 d-flex align-items-center gap-2 ${
                             isExactActive(child.href) ? "active" : "text-white"
                           }`}
+                          onClick={onClose}
                         >
                           {icons[child.icon]}
                           {child.label}
@@ -159,6 +174,7 @@ export default function Sidebar() {
                 className={`nav-link d-flex align-items-center gap-2 ${
                   isExactActive(item.href) ? "active" : "text-white"
                 }`}
+                onClick={onClose}
               >
                 {icons[item.icon]}
                 {item.label}

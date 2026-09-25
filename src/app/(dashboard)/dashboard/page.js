@@ -11,8 +11,8 @@ export default async function DashboardPage() {
   }
 
   return (
-    <main className="p-4">
-      <div className="d-flex align-items-center gap-3 mb-4">
+    <main className="p-3 p-md-4">
+      <div className="d-flex flex-wrap align-items-center gap-3 mb-4">
         {session.user.image && (
           <Image
             src={session.user.image}
@@ -24,7 +24,7 @@ export default async function DashboardPage() {
         )}
         <div>
           <h1 className="h4 mb-0">Welcome, {session.user.name}!</h1>
-          <p className="text-muted mb-0">{session.user.email}</p>
+          <p className="text-muted mb-0 text-break">{session.user.email}</p>
         </div>
       </div>
       <p className="text-muted mb-0">

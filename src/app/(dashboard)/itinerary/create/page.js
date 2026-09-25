@@ -35,7 +35,7 @@ export default async function CreateItineraryPage({ searchParams }) {
   }
 
   return (
-    <main className="p-4">
+    <main className="p-3 p-md-4">
       <h1 className="h3 mb-4">{view ? "View Itinerary" : "Create Itinerary"}</h1>
       {missing ? (
         <div className="alert alert-warning" role="alert">

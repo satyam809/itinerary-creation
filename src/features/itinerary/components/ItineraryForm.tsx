@@ -54,7 +54,7 @@ export default function ItineraryForm({ view = null }: { view?: ViewItinerary | 
   }
 
   return (
-    <div className="container-fluid py-4 px-3">
+    <div className="container-fluid p-0">
       <div className="row g-3">
         <div className="col-12">
           <div className="card h-100 border-0 mb-3">
@@ -63,7 +63,7 @@ export default function ItineraryForm({ view = null }: { view?: ViewItinerary | 
 
               <form onSubmit={handleSubmit} className="mt-3">
                 <div className="row g-2 align-items-end">
-                  <div className="col-12 col-md-6">
+                  <div className="col-12 col-lg-5">
                     <label htmlFor="place" className="form-label">Destination</label>
                     <DestinationInput
                       value={place}
@@ -74,7 +74,7 @@ export default function ItineraryForm({ view = null }: { view?: ViewItinerary | 
                     />
                   </div>
 
-                  <div className="col-6 col-md-2">
+                  <div className="col-6 col-lg-2">
                     <label htmlFor="days" className="form-label">Days</label>
                     <input
                       type="number"
@@ -90,7 +90,7 @@ export default function ItineraryForm({ view = null }: { view?: ViewItinerary | 
                     />
                   </div>
 
-                  <div className="col-6 col-md-3">
+                  <div className="col-6 col-lg-3">
                     <label htmlFor="tripType" className="form-label">Trip Type</label>
                     <select
                       id="tripType"
@@ -111,7 +111,7 @@ export default function ItineraryForm({ view = null }: { view?: ViewItinerary | 
                     </select>
                   </div>
 
-                  <div className="col-12 col-md-1 d-grid">
+                  <div className="col-12 col-lg-2 d-grid">
                     <button
                       type="submit"
                       className="btn btn-primary h-100"
