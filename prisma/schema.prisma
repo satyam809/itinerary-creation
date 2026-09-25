@@ -29,7 +29,7 @@ enum TripType {
 // Models
 // ---------------------------------------------------------------------------
 
-/// Application user, typically created from Google OAuth (NextAuth).
+/// Person who owns saved itineraries. Created from the signed-in email.
 model User {
   id            String    @id @default(cuid())
   name          String?   @db.VarChar(255)
@@ -39,34 +39,10 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts    Account[]
   itineraries Itinerary[]
 
   @@index([createdAt])
   @@map("users")
-}
-
-/// OAuth provider account linked to a user (e.g. Google).
-/// Compatible with @next-auth/prisma-adapter Account model.
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String  @db.VarChar(50)
-  provider          String  @db.VarChar(50)
-  providerAccountId String  @db.VarChar(255)
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String? @db.VarChar(50)
-  scope             String? @db.VarChar(255)
-  id_token          String? @db.Text
-  session_state     String? @db.VarChar(255)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-  @@index([userId])
-  @@map("accounts")
 }
 
 /// Saved generated trip itinerary owned by a user.

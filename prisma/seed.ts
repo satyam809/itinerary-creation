@@ -10,15 +10,6 @@ async function main() {
       name: "Demo Traveler",
       email: "demo@example.com",
       image: "https://lh3.googleusercontent.com/a/default-user",
-      accounts: {
-        create: {
-          type: "oauth",
-          provider: "google",
-          providerAccountId: "google-demo-account-001",
-          token_type: "Bearer",
-          scope: "openid email profile",
-        },
-      },
     },
   })
 
