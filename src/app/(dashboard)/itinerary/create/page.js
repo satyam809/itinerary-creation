@@ -26,7 +26,10 @@ export default async function CreateItineraryPage({ searchParams }) {
       view = {
         destination: itinerary.destination,
         days: itinerary.days,
-        tripType: itinerary.tripType,
+        destinationType: itinerary.destinationType,
+        travelStyle: itinerary.travelStyle,
+        budget: itinerary.budget,
+        startingLocation: itinerary.startingLocation,
         content: itinerary.content,
       }
     } else {

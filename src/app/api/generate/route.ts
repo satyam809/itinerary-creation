@@ -1,6 +1,13 @@
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import {
+  BUDGETS,
+  DESTINATION_TYPES,
+  isAllowedOption,
+  TRAVEL_STYLES,
+} from "@/features/itinerary/options";
+import { buildItineraryPrompt, normalizeGeneratedItinerary } from "@/features/itinerary/prompt";
+import {
   ItineraryValidationError,
   saveItinerary,
 } from "@/features/itinerary/services/saveItinerary";
@@ -14,11 +21,28 @@ import { authOptions } from "@/services/auth";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { destination, days, tripType } = body;
+    const destination = typeof body.destination === "string" ? body.destination.trim() : "";
+    const startingLocation = typeof body.startingLocation === "string" ? body.startingLocation.trim() : "";
+    const numberOfDays = Number(body.numberOfDays);
+    const destinationType = body.destinationType;
+    const travelStyle = body.travelStyle;
+    const budget = body.budget;
 
-    if (!destination || !days || !tripType) {
+    if (
+      !destination ||
+      !startingLocation ||
+      !Number.isInteger(numberOfDays) ||
+      numberOfDays < 1 ||
+      numberOfDays > 30 ||
+      !isAllowedOption(DESTINATION_TYPES, destinationType) ||
+      !isAllowedOption(TRAVEL_STYLES, travelStyle) ||
+      !isAllowedOption(BUDGETS, budget)
+    ) {
       return NextResponse.json(
-        { error: "`destination`, `days` and `tripType` are required" },
+        {
+          error:
+            "`destination`, `numberOfDays` (1-30), `destinationType`, `travelStyle`, `budget`, and `startingLocation` are required",
+        },
         { status: 400 }
       );
     }
@@ -42,25 +66,32 @@ export async function POST(req: NextRequest) {
 
     const persistGeneratedItinerary = async (text: string, raw: unknown) => {
       try {
+        const content = normalizeGeneratedItinerary(text);
         const itinerary = await saveItinerary({
           email: session.user.email as string,
           name: session.user.name,
           image: session.user.image,
           destination,
-          days: Number(days),
-          tripType,
-          content: text,
+          days: numberOfDays,
+          destinationType,
+          travelStyle,
+          budget,
+          startingLocation,
+          content,
         });
 
         return NextResponse.json(
           {
-            text,
+            text: content,
             raw,
             itinerary: {
               id: itinerary.id,
               destination: itinerary.destination,
               days: itinerary.days,
-              tripType: itinerary.tripType,
+              destinationType: itinerary.destinationType,
+              travelStyle: itinerary.travelStyle,
+              budget: itinerary.budget,
+              startingLocation: itinerary.startingLocation,
             },
           },
           { headers: quotaHeaders }
@@ -77,16 +108,14 @@ export async function POST(req: NextRequest) {
       }
     };
 
-    const prompt = `Generate a highly engaging and well-structured ${days}-day ${tripType} trip itinerary for ${destination}.
-For each day, include:
-
-1. Morning, afternoon, evening, and night activities
-2. The top must-visit sights
-3. Recommended local foods or dishes to try
-4. Practical travel tips specific to the location
-
-Format the output clearly by day, keep it concise, and ensure the itinerary feels exciting, helpful, and easy to follow.
-`;
+    const prompt = buildItineraryPrompt({
+      destination,
+      numberOfDays,
+      destinationType,
+      travelStyle,
+      budget,
+      startingLocation,
+    });
 
     const ollamaUrl = "https://ollama.com/api/generate";
     const ollamaModel = "gpt-oss:120b";
@@ -102,7 +131,7 @@ Format the output clearly by day, keep it concise, and ensure the itinerary feel
       res = await fetch(ollamaUrl, {
         method: "POST",
         headers,
-        body: JSON.stringify({ model: ollamaModel, prompt, stream: false }),
+        body: JSON.stringify({ model: ollamaModel, prompt, stream: false, format: "json" }),
       });
     } catch (fetchErr: any) {
       console.error("Network error contacting Ollama:", fetchErr);

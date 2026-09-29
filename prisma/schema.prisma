@@ -11,21 +11,6 @@ datasource db {
 }
 
 // ---------------------------------------------------------------------------
-// Enums
-// ---------------------------------------------------------------------------
-
-/// Trip styles supported by the itinerary create form and generate API.
-enum TripType {
-  adventure
-  relaxation
-  cultural
-  business
-  family
-  romantic
-  backpacking
-}
-
-// ---------------------------------------------------------------------------
 // Models
 // ---------------------------------------------------------------------------
 
@@ -47,20 +32,23 @@ model User {
 
 /// Saved generated trip itinerary owned by a user.
 model Itinerary {
-  id          Int      @id @default(autoincrement()) @db.UnsignedInt
-  userId      String
-  destination String   @db.VarChar(255)
-  days        Int      @db.UnsignedTinyInt
-  tripType    TripType
-  content     String   @db.MediumText
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               Int      @id @default(autoincrement()) @db.UnsignedInt
+  userId           String
+  destination      String   @db.VarChar(255)
+  days             Int      @db.UnsignedTinyInt
+  destinationType  String   @db.VarChar(64)
+  travelStyle      String   @db.VarChar(64)
+  budget           String   @db.VarChar(64)
+  startingLocation String   @db.VarChar(255)
+  content          String   @db.MediumText
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, createdAt])
-  @@index([tripType])
+  @@index([travelStyle])
   @@index([destination])
   @@map("itineraries")
 }

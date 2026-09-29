@@ -1,7 +1,10 @@
-import { TripType } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-
-const TRIP_TYPES = new Set<string>(Object.values(TripType))
+import {
+  BUDGETS,
+  DESTINATION_TYPES,
+  isAllowedOption,
+  TRAVEL_STYLES,
+} from "@/features/itinerary/options"
 
 export class ItineraryValidationError extends Error {
   constructor(message: string) {
@@ -16,7 +19,10 @@ export type SaveItineraryInput = {
   image?: string | null
   destination: string
   days: number
-  tripType: string
+  destinationType: string
+  travelStyle: string
+  budget: string
+  startingLocation: string
   content: string
 }
 
@@ -31,9 +37,24 @@ function requireText(value: string, label: string, maxLength: number) {
   return trimmed
 }
 
+function requireOption(
+  value: string,
+  options: readonly { value: string; label: string }[],
+  label: string,
+) {
+  if (!isAllowedOption(options, value)) {
+    throw new ItineraryValidationError(`${label} is not supported`)
+  }
+  return value
+}
+
 export async function saveItinerary(input: SaveItineraryInput) {
   const email = requireText(input.email, "Email", 255)
   const destination = requireText(input.destination, "Destination", 255)
+  const startingLocation = requireText(input.startingLocation, "Starting location", 255)
+  const destinationType = requireOption(input.destinationType, DESTINATION_TYPES, "Destination type")
+  const travelStyle = requireOption(input.travelStyle, TRAVEL_STYLES, "Travel style")
+  const budget = requireOption(input.budget, BUDGETS, "Budget")
   const content = input.content.trim()
   const days = Number(input.days)
   const name = input.name?.trim() ? input.name.trim().slice(0, 255) : null
@@ -44,9 +65,6 @@ export async function saveItinerary(input: SaveItineraryInput) {
   }
   if (!Number.isInteger(days) || days < 1 || days > 30) {
     throw new ItineraryValidationError("Days must be a whole number between 1 and 30")
-  }
-  if (!TRIP_TYPES.has(input.tripType)) {
-    throw new ItineraryValidationError("Trip type is not supported")
   }
 
   const user = await prisma.user.upsert({
@@ -60,7 +78,10 @@ export async function saveItinerary(input: SaveItineraryInput) {
       userId: user.id,
       destination,
       days,
-      tripType: input.tripType as TripType,
+      destinationType,
+      travelStyle,
+      budget,
+      startingLocation,
       content,
     },
   })

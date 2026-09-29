@@ -1,16 +1,12 @@
 import Link from "next/link"
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
+import { BUDGETS, DESTINATION_TYPES, optionLabel, TRAVEL_STYLES } from "@/features/itinerary/options"
 import { listItinerariesByEmail } from "@/features/itinerary/services/saveItinerary"
 import { authOptions } from "@/services/auth"
 import { formatDate } from "@/utils/formatters"
 
 export const dynamic = "force-dynamic"
-
-function tripTypeLabel(tripType) {
-  if (!tripType) return ""
-  return tripType.charAt(0).toUpperCase() + tripType.slice(1)
-}
 
 function ViewIcon() {
   return (
@@ -54,7 +50,10 @@ export default async function ListItineraryPage() {
               <tr>
                 <th scope="col">Destination</th>
                 <th scope="col">Days</th>
-                <th scope="col">Trip Type</th>
+                <th scope="col">Destination Type</th>
+                <th scope="col">Travel Style</th>
+                <th scope="col">Budget</th>
+                <th scope="col">Starting Location</th>
                 <th scope="col">Created</th>
                 <th scope="col" className="text-end">
                   Action
@@ -68,7 +67,12 @@ export default async function ListItineraryPage() {
                   <td>
                     {itinerary.days} {itinerary.days === 1 ? "day" : "days"}
                   </td>
-                  <td>{tripTypeLabel(itinerary.tripType)}</td>
+                  <td>{optionLabel(DESTINATION_TYPES, itinerary.destinationType)}</td>
+                  <td>{optionLabel(TRAVEL_STYLES, itinerary.travelStyle)}</td>
+                  <td>{optionLabel(BUDGETS, itinerary.budget)}</td>
+                  <td className="text-truncate" style={{ maxWidth: 220 }} title={itinerary.startingLocation}>
+                    {itinerary.startingLocation}
+                  </td>
                   <td>{formatDate(itinerary.createdAt)}</td>
                   <td className="text-end">
                     <Link

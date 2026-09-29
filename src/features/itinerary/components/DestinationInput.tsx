@@ -10,17 +10,21 @@ type Suggestion = {
 }
 
 export default function DestinationInput({
+  id,
   value,
   onChange,
   onSelect,
   placeholder = "Enter destination (e.g., Paris, France)",
   disabled = false,
+  required = false,
 }: {
+  id?: string
   value: string
   onChange: (v: string) => void
   onSelect?: (s: Suggestion) => void
   placeholder?: string
   disabled?: boolean
+  required?: boolean
 }) {
   const [query, setQuery] = useState(value || "")
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
@@ -105,9 +109,11 @@ export default function DestinationInput({
   return (
     <div className="position-relative" ref={ref}>
       <input
+        id={id}
         type="text"
         className="form-control"
         value={query}
+        required={required}
         onChange={(e) => {
           setQuery(e.target.value)
           onChange(e.target.value)

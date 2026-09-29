@@ -1,4 +1,4 @@
-import { PrismaClient, TripType } from "@prisma/client"
+import { PrismaClient } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
@@ -24,7 +24,10 @@ async function main() {
           userId: user.id,
           destination: "Paris, France",
           days: 5,
-          tripType: TripType.cultural,
+          destinationType: "city",
+          travelStyle: "cultural",
+          budget: "mid-range",
+          startingLocation: "London, United Kingdom",
           content: `# 5-Day Cultural Trip to Paris
 
 ## Day 1
@@ -48,7 +51,10 @@ async function main() {
           userId: user.id,
           destination: "Bali, Indonesia",
           days: 7,
-          tripType: TripType.relaxation,
+          destinationType: "island",
+          travelStyle: "relaxation",
+          budget: "mid-range",
+          startingLocation: "Singapore",
           content: `# 7-Day Relaxation Trip to Bali
 
 ## Day 1
@@ -72,7 +78,10 @@ async function main() {
           userId: user.id,
           destination: "Tokyo, Japan",
           days: 4,
-          tripType: TripType.adventure,
+          destinationType: "city",
+          travelStyle: "adventure",
+          budget: "budget",
+          startingLocation: "Osaka, Japan",
           content: `# 4-Day Adventure Trip to Tokyo
 
 ## Day 1
