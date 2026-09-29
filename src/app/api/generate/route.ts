@@ -4,6 +4,11 @@ import {
   ItineraryValidationError,
   saveItinerary,
 } from "@/features/itinerary/services/saveItinerary";
+import {
+  consumeRateLimit,
+  rateLimitHeaders,
+  rateLimitMessage,
+} from "@/lib/rateLimit";
 import { authOptions } from "@/services/auth";
 
 export async function POST(req: NextRequest) {
@@ -26,6 +31,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const quota = await consumeRateLimit(`generate:${session.user.email.toLowerCase()}`);
+    if (!quota.allowed) {
+      return NextResponse.json(
+        { error: rateLimitMessage(quota) },
+        { status: 429, headers: rateLimitHeaders(quota) }
+      );
+    }
+    const quotaHeaders = rateLimitHeaders(quota);
+
     const persistGeneratedItinerary = async (text: string, raw: unknown) => {
       try {
         const itinerary = await saveItinerary({
@@ -38,16 +52,19 @@ export async function POST(req: NextRequest) {
           content: text,
         });
 
-        return NextResponse.json({
-          text,
-          raw,
-          itinerary: {
-            id: itinerary.id,
-            destination: itinerary.destination,
-            days: itinerary.days,
-            tripType: itinerary.tripType,
+        return NextResponse.json(
+          {
+            text,
+            raw,
+            itinerary: {
+              id: itinerary.id,
+              destination: itinerary.destination,
+              days: itinerary.days,
+              tripType: itinerary.tripType,
+            },
           },
-        });
+          { headers: quotaHeaders }
+        );
       } catch (error) {
         if (error instanceof ItineraryValidationError) {
           return NextResponse.json({ error: error.message }, { status: 400 });
