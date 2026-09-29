@@ -13,6 +13,10 @@ function field(value: string) {
   return value.trim().replace(/\s+/g, " ")
 }
 
+function jsonText(value: string) {
+  return JSON.stringify(value).slice(1, -1)
+}
+
 export function buildItineraryPrompt(input: ItineraryPromptInput) {
   const destination = field(input.destination)
   const startingLocation = field(input.startingLocation)
@@ -20,60 +24,56 @@ export function buildItineraryPrompt(input: ItineraryPromptInput) {
   const travelStyle = optionLabel(TRAVEL_STYLES, input.travelStyle)
   const budget = optionLabel(BUDGETS, input.budget)
 
-  return `You are an expert travel itinerary planner.
+  return `You are an expert travel itinerary planner. The itinerary is shown as a responsive day-by-day timeline on phones and desktops, so every line must be short enough to scan.
 
-Create a practical and engaging travel itinerary based on the following inputs:
+Trip:
+- Destination: ${destination}
+- Number of days: ${input.numberOfDays}
+- Destination type: ${destinationType}
+- Travel style: ${travelStyle}
+- Budget: ${budget}
+- Starting location: ${startingLocation}
 
-Destination: ${destination}
-Number of Days: ${input.numberOfDays}
-Destination Type: ${destinationType}
-Travel Style: ${travelStyle}
-Budget: ${budget}
-Starting Location: ${startingLocation}
+Planning rules:
+- Include every day from 1 through ${input.numberOfDays}, in order.
+- Split each day into morning, afternoon, and evening.
+- Use 2 morning activities, 2 afternoon activities, and 1 or 2 evening activities. Never more than 3 activities in one period.
+- Order stops so the traveler stays in one area before moving on. When a transfer is long, mention that time in the activity description.
+- Match activities to the destination type, travel style, and budget.
+- On short trips, keep only the highest-value experiences.
+- Vary the kind of activity across the day.
+- Suggest a local food style for the day, not a made-up restaurant name.
+- Add one or two practical tips per day, plus a few trip-wide tips.
+- Do not invent opening hours, ticket prices, reservation status, or exact fares.
+- Write plain sentences. No markdown, headings, or bullet characters inside string values.
 
-Requirements:
-1. Create a day-by-day itinerary for the complete trip.
-2. For each day, include:
-   - Day title
-   - Morning activities
-   - Afternoon activities
-   - Evening activities
-   - Recommended places/attractions
-   - Approximate time required for each activity
-   - Suggested local food/restaurant type
-3. Arrange places logically to minimize unnecessary travel.
-4. Don't overload a single day with too many activities.
-5. Include realistic travel time between major locations.
-6. Prioritize must-visit attractions first.
-7. Consider the destination type when selecting activities.
-8. Keep the itinerary realistic, useful, and easy to follow.
-9. Avoid repeating the same type of activity unless necessary.
-10. If the trip duration is short, prioritize the most important experiences.
-11. Add practical tips where useful.
-12. Do not invent specific opening hours, ticket prices, or availability unless reliable data is provided.
+Return valid JSON only. Morning, afternoon, and evening items must be objects, never strings. Use this shape:
 
-Return the response in valid JSON only.
-
-JSON structure:
 {
-  "destination": "",
-  "summary": "",
+  "destination": "${jsonText(destination)}",
+  "summary": "Two sentences on the trip shape, pace, and who it suits.",
   "days": [
     {
       "day": 1,
-      "title": "",
-      "morning": [],
+      "title": "Short theme, six words or fewer",
+      "morning": [
+        {
+          "activity": "Short activity name",
+          "duration": "1.5 hours",
+          "description": "One sentence on what to do and why this stop fits the day."
+        }
+      ],
       "afternoon": [],
       "evening": [],
-      "places": [],
-      "foodSuggestions": [],
-      "travelTips": []
+      "places": ["Place name"],
+      "foodSuggestions": ["Cuisine or meal style"],
+      "travelTips": ["One practical tip"]
     }
   ],
-  "generalTips": [],
+  "generalTips": ["Trip-wide tip"],
   "estimatedBudget": {
-    "level": "",
-    "notes": ""
+    "level": "${jsonText(budget)}",
+    "notes": "One sentence on how spending should feel at this budget, without invented prices."
   }
 }`
 }

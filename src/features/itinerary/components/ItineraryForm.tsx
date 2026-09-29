@@ -223,12 +223,18 @@ export default function ItineraryForm({ view = null }: { view?: ViewItinerary | 
         </div>
 
         <div className="col-12">
-          <div className="card h-100 mb-3">
-            <div className="card-body p-3">
-              <h2 className="card-title text-center">Generated Itinerary</h2>
-              <div className="mt-3">
-                <ItineraryResult result={result} destination={destination} />
-              </div>
+          <div className="card border-0 mb-3">
+            <div className="card-body p-2 p-md-3">
+              <ItineraryResult
+                result={result}
+                loading={loading}
+                destination={destination}
+                days={numberOfDays}
+                destinationType={destinationType}
+                travelStyle={travelStyle}
+                budget={budget}
+                startingLocation={startingLocation}
+              />
             </div>
           </div>
         </div>
