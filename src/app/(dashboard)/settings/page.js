@@ -1,16 +1,14 @@
-import { getServerSession } from "next-auth"
-import { redirect } from "next/navigation"
+"use client"
+
 import Image from "next/image"
-import { authOptions } from "@/services/auth"
+import { useAuth } from "@/features/auth/components/AuthProvider"
 
-export default async function SettingsPage() {
-  const session = await getServerSession(authOptions)
+export default function SettingsPage() {
+  const { user } = useAuth()
 
-  if (!session?.user) {
-    redirect("/login")
-  }
+  if (!user) return null
 
-  const { id, name, email, image } = session.user
+  const { id, name, email, image } = user
 
   const details = [
     { label: "User ID", value: id },

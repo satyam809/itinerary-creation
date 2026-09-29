@@ -1,51 +1,55 @@
-import { getServerSession } from "next-auth"
-import { redirect } from "next/navigation"
+"use client"
+
+import { useSearchParams } from "next/navigation"
+import { Suspense, useEffect, useState } from "react"
 import ItineraryForm from "@/features/itinerary/components/ItineraryForm"
-import { getItineraryByIdForEmail } from "@/features/itinerary/services/saveItinerary"
-import { authOptions } from "@/services/auth"
+import { apiFetch } from "@/services/api"
 
-export const dynamic = "force-dynamic"
-
-export default async function CreateItineraryPage({ searchParams }) {
-  const params = await searchParams
-  const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id
+function CreateItinerary() {
+  const params = useSearchParams()
+  const rawId = params.get("id")
   const id = rawId ? Number(rawId) : NaN
   const requestedView = Number.isInteger(id) && id > 0
+  const [view, setView] = useState(null)
+  const [missing, setMissing] = useState(false)
+  const [loading, setLoading] = useState(requestedView)
 
-  let view = null
-  let missing = false
-
-  if (requestedView) {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
-      redirect("/login")
-    }
-
-    const itinerary = await getItineraryByIdForEmail(session.user.email, id)
-    if (itinerary) {
-      view = {
-        destination: itinerary.destination,
-        days: itinerary.days,
-        destinationType: itinerary.destinationType,
-        travelStyle: itinerary.travelStyle,
-        budget: itinerary.budget,
-        startingLocation: itinerary.startingLocation,
-        content: itinerary.content,
-      }
-    } else {
-      missing = true
-    }
-  }
+  useEffect(() => {
+    if (!requestedView) return
+    apiFetch(`/itineraries/${id}`)
+      .then((itinerary) => {
+        setView({
+          destination: itinerary.destination,
+          days: itinerary.days,
+          destinationType: itinerary.destinationType,
+          travelStyle: itinerary.travelStyle,
+          budget: itinerary.budget,
+          startingLocation: itinerary.startingLocation,
+          content: itinerary.content,
+        })
+      })
+      .catch(() => setMissing(true))
+      .finally(() => setLoading(false))
+  }, [id, requestedView])
 
   return (
     <main className="p-4">
       <h1 className="h3 mb-4">{view ? "View Itinerary" : "Create Itinerary"}</h1>
+      {loading ? <p className="text-muted">Loading...</p> : null}
       {missing ? (
         <div className="alert alert-warning" role="alert">
           Itinerary not found.
         </div>
       ) : null}
-      <ItineraryForm view={view} />
+      {!loading ? <ItineraryForm view={view} /> : null}
     </main>
+  )
+}
+
+export default function CreateItineraryPage() {
+  return (
+    <Suspense fallback={<main className="p-4">Loading...</main>}>
+      <CreateItinerary />
+    </Suspense>
   )
 }

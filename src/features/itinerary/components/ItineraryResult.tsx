@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypeRaw from "rehype-raw"
 import { BUDGETS, DESTINATION_TYPES, optionLabel, TRAVEL_STYLES } from "@/features/itinerary/options"
+import { apiFetch } from "@/services/api"
 
 type Block = { title: string; markdown: string }
 
@@ -291,35 +292,25 @@ export default function ItineraryResult({
   startingLocation,
 }: ItineraryTripMeta & { result: string | null; loading?: boolean }) {
   const parsed = result ? parseItineraryJson(result) : null
-  const accessKey = typeof process !== "undefined" ? (process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY as string | undefined) : undefined
-  const useUnsplash = Boolean(accessKey)
   const blocks = result && !parsed ? parseIntoDayBlocks(result) : []
 
   const [images, setImages] = useState<Record<number, string | null>>({})
   const blockKey = blocks.map((block) => block.title).join("|")
 
   useEffect(() => {
-    if (!result || !useUnsplash || !blocks.length) return
+    if (!result || !blocks.length) return
     blocks.forEach(async (b, i) => {
       try {
         const query = encodeURIComponent(`${destination ? destination + " " : ""}${b.title}`)
-        const url = `https://api.unsplash.com/search/photos?query=${query}&per_page=1`
-        const res = await fetch(url, { headers: { Authorization: `Client-ID ${accessKey}` } })
-        if (!res.ok) return
-        const data = await res.json()
-        const first = data?.results?.[0]
-        if (first && first.urls && first.urls.small) {
-          setImages((prev) => ({ ...prev, [i]: first.urls.small }))
-        } else {
-          setImages((prev) => ({ ...prev, [i]: null }))
-        }
+        const data = await apiFetch(`/photos/search?query=${query}`)
+        setImages((prev) => ({ ...prev, [i]: data?.url ?? null }))
       } catch {
         setImages((prev) => ({ ...prev, [i]: null }))
       }
     })
     // blockKey tracks day titles; `blocks` is a new array each render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [result, destination, useUnsplash, accessKey, blockKey])
+  }, [result, destination, blockKey])
 
   if (loading) {
     return (
@@ -355,7 +346,7 @@ export default function ItineraryResult({
           <div className="card mb-3" key={i}>
             <div className="card-body">
               <h3 className="h6 mb-2">{b.title}</h3>
-              {useUnsplash && images[i] ? (
+              {images[i] ? (
                 <img src={images[i] ?? undefined} alt="" className="img-fluid rounded mb-2" />
               ) : null}
               <div className="markdown-container">

@@ -1,8 +1,10 @@
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
+import AuthGate from "@/features/auth/components/AuthGate";
 
 export default function DashboardLayout({ children }) {
   return (
+    <AuthGate>
     <div className="d-flex min-vh-100">
       <Sidebar />
       <div className="d-flex flex-column flex-grow-1">
@@ -10,5 +12,6 @@ export default function DashboardLayout({ children }) {
         <div className="flex-grow-1 overflow-auto">{children}</div>
       </div>
     </div>
+    </AuthGate>
   );
 }

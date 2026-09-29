@@ -2,7 +2,9 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+Start the API in `itinerary-creation-backend` first (`npm run start:dev`, port 3001). This app is the UI only. Set `NEXT_PUBLIC_API_URL` in `.env` (see `.env.example`).
+
+Then run the development server:
 
 ```bash
 npm run dev

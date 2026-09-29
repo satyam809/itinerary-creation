@@ -1,12 +1,10 @@
-import Link from "next/link"
-import { getServerSession } from "next-auth"
-import { redirect } from "next/navigation"
-import { BUDGETS, DESTINATION_TYPES, optionLabel, TRAVEL_STYLES } from "@/features/itinerary/options"
-import { listItinerariesByEmail } from "@/features/itinerary/services/saveItinerary"
-import { authOptions } from "@/services/auth"
-import { formatDate } from "@/utils/formatters"
+"use client"
 
-export const dynamic = "force-dynamic"
+import Link from "next/link"
+import { useEffect, useState } from "react"
+import { BUDGETS, DESTINATION_TYPES, optionLabel, TRAVEL_STYLES } from "@/features/itinerary/options"
+import { apiFetch } from "@/services/api"
+import { formatDate } from "@/utils/formatters"
 
 function ViewIcon() {
   return (
@@ -28,22 +26,30 @@ function ViewIcon() {
   )
 }
 
-export default async function ListItineraryPage() {
-  const session = await getServerSession(authOptions)
+export default function ListItineraryPage() {
+  const [itineraries, setItineraries] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  if (!session?.user?.email) {
-    redirect("/login")
-  }
-
-  const itineraries = await listItinerariesByEmail(session.user.email)
+  useEffect(() => {
+    apiFetch("/itineraries")
+      .then((data) => setItineraries(Array.isArray(data) ? data : []))
+      .catch((err) => setError(err instanceof Error ? err.message : "Could not load itineraries"))
+      .finally(() => setLoading(false))
+  }, [])
 
   return (
     <main className="p-4">
       <h1 className="h3 mb-4">Itinerary List</h1>
 
-      {itineraries.length === 0 ? (
+      {loading ? <p className="text-muted mb-0">Loading...</p> : null}
+      {error ? <div className="alert alert-danger">{error}</div> : null}
+
+      {!loading && !error && itineraries.length === 0 ? (
         <p className="text-muted mb-0">No itineraries yet.</p>
-      ) : (
+      ) : null}
+
+      {!loading && !error && itineraries.length > 0 ? (
         <div className="table-responsive">
           <table className="table table-striped table-hover align-middle mb-0">
             <thead>
@@ -89,7 +95,7 @@ export default async function ListItineraryPage() {
             </tbody>
           </table>
         </div>
-      )}
+      ) : null}
     </main>
   )
 }

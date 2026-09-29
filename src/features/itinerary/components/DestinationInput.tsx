@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
+import { apiFetch } from "@/services/api"
 
 type Suggestion = {
   place_id?: number
@@ -47,11 +48,8 @@ export default function DestinationInput({
     if (timer.current) window.clearTimeout(timer.current)
     timer.current = window.setTimeout(async () => {
       try {
-        const q = encodeURIComponent(query)
-        const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${q}&addressdetails=1&limit=6`
-        const resp = await fetch(url, { headers: { Accept: "application/json" } })
-        const data = await resp.json()
-        const items: Suggestion[] = (data || []).map((d: any) => ({
+        const data = await apiFetch(`/places/search?q=${encodeURIComponent(query)}`)
+        const items: Suggestion[] = (Array.isArray(data) ? data : []).map((d: any) => ({
           place_id: d.place_id,
           display_name: d.display_name,
           lat: d.lat,

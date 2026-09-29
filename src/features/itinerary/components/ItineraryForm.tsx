@@ -4,6 +4,7 @@ import { useState } from "react"
 import DestinationInput from "./DestinationInput"
 import ItineraryResult from "./ItineraryResult"
 import { BUDGETS, DESTINATION_TYPES, TRAVEL_STYLES } from "@/features/itinerary/options"
+import { apiFetch } from "@/services/api"
 
 export type ViewItinerary = {
   destination: string
@@ -81,9 +82,8 @@ export default function ItineraryForm({ view = null }: { view?: ViewItinerary | 
     setLoading(true)
 
     try {
-      const resp = await fetch("/api/generate", {
+      const data = await apiFetch("/itineraries/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           destination,
           numberOfDays: Number(numberOfDays),
@@ -94,15 +94,9 @@ export default function ItineraryForm({ view = null }: { view?: ViewItinerary | 
         }),
       })
 
-      const data = await resp.json()
-
-      if (!resp.ok) {
-        setError(data?.error || "Failed to generate itinerary")
-      } else {
-        setResult(data.text ?? JSON.stringify(data.raw ?? data))
-        if (data.itinerary?.id) {
-          setSavedMessage("Itinerary saved.")
-        }
+      setResult(data.text ?? JSON.stringify(data.raw ?? data))
+      if (data.itinerary?.id) {
+        setSavedMessage("Itinerary saved.")
       }
     } catch (err: any) {
       setError(err?.message ?? String(err))

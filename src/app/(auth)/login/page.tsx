@@ -1,20 +1,46 @@
 "use client"
 
-import { signIn, useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { FormEvent, Suspense, useEffect, useState } from "react"
+import { useAuth } from "@/features/auth/components/AuthProvider"
+import { getApiUrl } from "@/services/api"
 
-export default function LoginPage() {
-  const { data: session, status } = useSession()
+function LoginForm() {
+  const { isAuthenticated, isLoading, signIn } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user) {
+    if (!isLoading && isAuthenticated) {
       router.replace("/dashboard")
     }
-  }, [status, session, router])
+  }, [isAuthenticated, isLoading, router])
 
-  if (status === "loading" || status === "authenticated") {
+  useEffect(() => {
+    if (searchParams.get("error") === "google") {
+      setError("Google sign-in failed. Try again.")
+    }
+  }, [searchParams])
+
+  const onSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    setError(null)
+    setSubmitting(true)
+    try {
+      await signIn(email, password)
+      router.replace("/dashboard")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign in failed")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  if (isLoading || isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
         <p className="text-zinc-600 dark:text-zinc-400">Loading...</p>
@@ -26,16 +52,53 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
       <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-lg dark:bg-zinc-900">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Welcome
-          </h1>
-          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Sign in to your account
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Welcome</h1>
+          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">Sign in to your account</p>
         </div>
 
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+            />
+          </div>
+          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full rounded-lg bg-zinc-900 px-4 py-3 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+          >
+            {submitting ? "Signing in…" : "Sign in"}
+          </button>
+        </form>
+
         <button
-          onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+          onClick={() => {
+            window.location.href = `${getApiUrl()}/auth/google`
+          }}
           className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-300 bg-white px-4 py-3 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -58,7 +121,28 @@ export default function LoginPage() {
           </svg>
           Sign in with Google
         </button>
+
+        <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
+          No account yet?{" "}
+          <a href="/register" className="font-medium text-zinc-900 underline dark:text-zinc-100">
+            Create one
+          </a>
+        </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+          <p className="text-zinc-600 dark:text-zinc-400">Loading...</p>
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   )
 }
